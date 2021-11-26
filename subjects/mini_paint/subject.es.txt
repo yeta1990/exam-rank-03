@@ -1,0 +1,67 @@
+Nombre  : mini_paint
+Ficheros esperados : *.c *.h
+Funciones permitidas: fopen, fread, fscanf, fclose, write, malloc, calloc, realloc, free, memset, powf, sqrtf
+--------------------------------------------------------------------------------------
+
+Escriba un programa que lea un "fichero de operaciones" y muestre el resultado en el terminal.
+
+Su programa debe aceptar como único argumento la ruta del "fichero de operaciones". Si el programa recibe 0 ó más de 1 argumento, mostrará: "Error: argument" seguido por un \n en STDOUT
+
+$> ./mini_paint | cat -e
+Error: argument$
+$> ./mini_paint do not fear mathematics | cat -e
+Error: argument$
+$> 
+
+Si surge cualquier problema mientras abre o lee el "fichero de operaciones", escriba "Error: Operation file corrupted" seguido de \n en STDOUT.
+
+El "fihcero de operaciones" una operación por línea.
+Si una línea es incorrecta, se producirá un error.
+Si se produce un error, el programa devolverá un 1.
+Si no se produce ningún error, devolverá un 0.
+La última línea puede tener o no un \n.
+Se leerán las líneas en orden, y las operaciones se ejecutarán en el orden en que aparecen.
+Deberá haber un espacio entre cada variables de una línea.
+
+WIDTH HEIGHT BACKGROUND_CHAR
+Esta línea será siempre la primera línea del fichero y definirá la zona en la que se va a dibujar. El programa no debe dibujar nada fuera de la zona de dibujo. Debe aparecer únicamente una vez.
+- WIDTH: un entero tal que 0 < WIDTH <= 300; es el número total de caracteres en horizontal de la zona de dibujo.
+- HEIGHT: un entero tal que 0 < HEIGHT <= 300; es el número total de caracteres en vertical de la zona de dibujo. 
+- BACKGROUND_CHAR: cuanlquier espacio vacío será rellenado con BACKGROUND_CHAR
+
+c X Y RADIUS CHAR
+Esta operación dibujará un círculo vacío, del que sólo se dibujará el contorno
+- c: el caracter c
+- X: un float; es la posición horizontal del centro del círculo
+- Y: un float; es la posición vertical del centro del círculo
+- RADIUS: un float positivo no nulo; es el radio del círculo
+- CHAR: el carácter con el que se va a dibujar el círculo
+
+C X Y RADIUS  CHAR
+Esta operación dibujará un círculo relleno
+- C: el carácter c
+- X: un float; es la posición horizontal del centro del círculo
+- Y: un float; es la posición vertical del centro del círculo
+- RADIUS: un float positivo no nulo; es el radio del círculo
+- CHAR: el carácter con el que se va a dibujar el círculo
+
+
+La zona de dibujo se divide en rectángulos que pueden contener cada uno un carácter (porque estamos en un terminal). Llamaremos a los rectángulos pixel.
+Para que todo sea más fácil, sólo usaremos la esquina superior izquierda del pixel para saber si ese pixel está en un círculo o no.
+
+Si la distancia entre la esquina superior izquierda de un pixel y el centro del círculo es menor o igual al radio del círculo, el pixel es parte del círculo.
+Además:
+	Un pixel cuya esquina superior izquierda está a una distancia mayor o igual a uno del borde del círculo no forma parte de un círculo vacío.
+
+	Un pixel cuya esquina superior izquierda está a una distancia inferior a uno del borde del círculo forma parte de un círculo vacío.
+
+Le aconsejamos que mire la imagen mientras lee las siguientes líneas. Representa un terminal. Hemos definido una zona de dibujo de WIDTH 5 y HEIGHT 3.
+Le aconsejamos que mire la imagen mientras lee las siguientes líneas. Representa un terminal. Hemos definido una zona de dibujo de WIDTH 5 y HEIGHT 3.
+Hemos escrito diferentes caracteres para ayudarle a comprender las siguientes explicaciones:
+- Si quiere dibujar la operación: C 1.5 1.5 1 @ (el círculo rosa)
+-- significa que los caracteres 'b', 'c', 'B', 'C' de la imagen serán substituidos por '@'
+
+Busque our_mini_paint, que le ayudrá a probar su programa con algún operation_file.example
+
+Pista:
+La distancia entre dos puntos (Xa,Ya) y (Xb,Yb) es la raíz cuadrada de (Xa - Xb) * (Xa - Xb) + (Ya - Yb) * (Ya - Yb)
