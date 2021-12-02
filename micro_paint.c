@@ -1,13 +1,6 @@
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-
-int throw_error(void)
-{
-	write(1, "Error: Operation file corrupted\n", 32);
-	return (1);
-}
 
 typedef struct s_zone
 {
@@ -30,6 +23,8 @@ typedef struct s_square
 char **create_map(t_zone z);
 void	print_map(char **map, t_zone z);
 void	fill_square(char ***map, t_zone *z, t_square *sq);
+int throw_error(void);
+void	free_map(char **map, t_zone *z);
 
 int main(int argc, char **argv)
 {
@@ -50,8 +45,6 @@ int main(int argc, char **argv)
 	if (!f)
 		return (throw_error());
 	n = fscanf(f, "%d %d %c\n", &z.width, &z.height, &z.background);
-	printf("%i %i %c\n", z.width, z.height, z.background);
-//	printf("%i\n", n);
 	if (n == 3 && z.width > 0 && z.width <= 300 && z.height > 0 && z.height <= 300)
 	{
 		map = create_map(z);
@@ -61,19 +54,19 @@ int main(int argc, char **argv)
 		return(throw_error());
 	while (n == 6)
 	{
-//		printf("%i\n", n);
 		fill_square(&map, &z, &sq);
 		if (sq.type != 'r' && sq.type != 'R')
 			return (throw_error());
-		if (sq.width == 0.000000 || sq.height == 0.000000)
+		if (sq.width <= 0.00000000 || sq.height <= 0.00000000)
 			return (throw_error());
-		printf("%c %f %f %f %f %c\n", sq.type, sq.x, sq.y, sq.width, sq.height, sq.draw);
 		n = fscanf(f, "%c %f %f %f %f %c\n", &sq.type, &sq.x, &sq.y, &sq.width, &sq.height, &sq.draw);
 	}
-	fclose(f);
 	if (n == -1)
 	{
 		print_map(map, z);
+		fclose(f);
+		free_map(map, &z);
+	//	system("leaks micro_paint");
 		return (0);	
 	}
 	return(throw_error());
@@ -93,70 +86,80 @@ char **create_map(t_zone z)
 	{
 		map[i] = malloc(sizeof(char) * (z.width + 1));
 		j = 0;
-	while (j < z.width)
-	{
-		map[i][j] = z.background;
-		j++;
+		while (j < z.width)
+		{
+			map[i][j] = z.background;
+			j++;
+		}
+		map[i][j] = 0;
+		i++;
 	}
-	i++;
-}
-map[i] = 0;
-return (map);
+	map[i] = 0;
+	return (map);
 }
 
 void	print_map(char **map, t_zone z)
 {
-int	i;
-int	j;
-
-i = 0;
-while (map[i] && i < z.height)
-{
-	j = 0;
-	while (map[i][j] && j < z.width)
+	int	i;
+	int	j;
+	
+	i = 0;
+	while (map[i] && i < z.height)
 	{
-		write(1, &map[i][j], 1);	
-		j++;
-	}
-	write(1, "\n", 1);
-	i++;
-}	
+		j = 0;
+		while (map[i][j] && j < z.width)
+		{
+			write(1, &map[i][j], 1);	
+			j++;
+		}
+		write(1, "\n", 1);
+		i++;
+	}	
 }
 
 void	fill_square(char ***map, t_zone *z, t_square *sq)
 {
-int	i;
-int	j;
-
-i = 0;
-j = 0;
-while ((*map)[i] && i < z->height)
-{
-	j = 0;
-	while ((*map)[i][j] && j < z->width)
+	int	x;
+	int	y;
+	
+	x = 0;
+	y = 0;
+	while ((*map)[y] && y < z->height)
 	{
-		//If a point is defined as (Xa, Ya)
-		//And a rectangle with a top left corner (Xtl, Ytl) and a bottom right corner (Xbr, Ybr)
-		//If Xtl <= Xa <= Xbr and Ytl <= Ya <= Ybr then the point is in the rectangle%
-//		if (sq.type == 'r')
-//		{
-			if ((sq->x <= j && j <= sq->x + sq->height) && (sq->y <= i && i <= sq->y + sq->width))
+		x = 0;
+		while ((*map)[y][x] && x < z->width)
+		{
+					if (sq->x <= x && x <= sq->x + sq->width && sq->y <= y && y <= sq->y + sq->height)
 			{
-		//		if (sq->type == 'r' && (i - sq->x) < 1 && (j - sq->y) < 1)
-		//				(*map)[i][j] = sq->draw;
-	//				else
-						(*map)[i][j] = sq->draw;
-				}
-
-	//		}
-	//		else if (sq.type == 'R')
-	//		{
-	//			if ((sq.x <= j && j <= sq.x + sq.height) && (sq.y <= i && i <= sq.y + sq.width))
-	//				(*map)[i][j] = sq.draw;
-	//		}
-			j++;
+				if (sq->type == 'r' && ( x - sq->x < 1.00000000 ||
+						   	y - sq->y < 1.00000000 || sq->x + sq->width - x < 1.00000000 ||
+						   	sq->y + sq->height - y < 1.00000000 ))
+					(*map)[y][x] = sq->draw;
+				else if (sq->type == 'R')
+					(*map)[y][x] = sq->draw;
+			}
+			x++;
 		}
-		i++;
+		y++;
 	}
+}
 
-}	
+int throw_error(void)
+{
+	write(1, "Error: Operation file corrupted\n", 32);
+	return (1);
+}
+
+void	free_map(char **map, t_zone *z)
+{
+	int	y;
+	
+	y = 0;
+	while (y <= z->height)
+	{
+		free(map[y]);
+		y++;
+	}
+	free(map);
+
+}
